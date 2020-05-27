@@ -1,6 +1,6 @@
 [package]
 name = "macro-input-macros"
-version = "0.1.0-pre"
+version = "0.1.0"
 authors = ["Tom Dohrmann <erbse.13@gmx.de>"]
 edition = "2018"
 license = "WTFPL"
@@ -12,7 +12,7 @@ proc-macro = true
 
 [dependencies]
 macro-compose = "0.1"
-macro-input-core = { path = "../macro-input-core", version = "0.1.0-pre" }
+macro-input-core = { path = "../macro-input-core", version = "0.1.0" }
 
 syn = { version = "1.0", features = ["full", "extra-traits"] }
 quote = "1.0"
@@ -21,4 +21,4 @@ proc-macro2 = "1.0"
 heck = "0.3"
 
 [dev-dependencies]
-# macro-input = { path = "..", version = "0.1" }
+macro-input = { path = "..", version = "0.1.0-pre" }

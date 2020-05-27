@@ -1,6 +1,6 @@
 [package]
 name = "macro-input-core"
-version = "0.1.0-pre"
+version = "0.1.0"
 authors = ["Tom Dohrmann <erbse.13@gmx.de>"]
 edition = "2018"
 license = "WTFPL"
@@ -14,4 +14,4 @@ proc-macro2 = "1.0"
 quote = "1.0"
 
 [dev-dependencies]
-# macro-input = { path = "..", version = "0.1" } 
+macro-input = { path = "..", version = "0.1.0-pre" } 
