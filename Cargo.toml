@@ -1,0 +1,19 @@
+[package]
+name = "macro-input"
+version = "0.1.0-pre"
+authors = ["Tom Dohrmann <erbse.13@gmx.de>"]
+edition = "2018"
+license = "WTFPL"
+repository = "https://github.com/Freax13/macro-input"
+description = "a library for parsing macro inputs"
+
+[workspace]
+members = ["macro-input-core", "macro-input-macros"]
+
+[dependencies]
+macro-input-core = { path = "macro-input-core", version = "0.1.0-pre" }
+macro-input-macros = { path = "macro-input-macros", optional = true, version = "0.1.0-pre" }
+
+[features]
+default = ["macros"]
+macros = ["macro-input-macros"]

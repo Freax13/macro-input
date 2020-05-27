@@ -1,0 +1,17 @@
+[package]
+name = "macro-input-core"
+version = "0.1.0-pre"
+authors = ["Tom Dohrmann <erbse.13@gmx.de>"]
+edition = "2018"
+license = "WTFPL"
+repository = "https://github.com/Freax13/macro-input"
+description = "the core part of macro-input"
+
+[dependencies]
+macro-compose = "0.1"
+syn = { version = "1.0", features = ["full", "extra-traits"] }
+proc-macro2 = "1.0"
+quote = "1.0"
+
+[dev-dependencies]
+# macro-input = { path = "..", version = "0.1" } 
