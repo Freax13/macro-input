@@ -14,6 +14,7 @@ impl Expand<DeriveInput> for ConstFieldsExpand {
     fn expand(&self, input: &DeriveInput, c: &mut Collector) -> Option<Self::Output> {
         let path = RENAME_FIELD
             .get_value::<Option<String>>(&input.attrs)
+            .unwrap()
             .unwrap_or_else(|| input.ident.to_string().to_snek_case());
 
         let const_field_expand = ConstFieldExpand { path };

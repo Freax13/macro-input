@@ -1,4 +1,5 @@
 use crate::FieldDef;
+#[cfg(feature = "legacy")]
 use macro_compose::{Collector, Lint};
 use quote::ToTokens;
 use syn::{Attribute, Error, Meta, NestedMeta, Path};
@@ -53,6 +54,7 @@ impl<'a> From<&'a [&'a FieldDef<'a>]> for FieldDefs<'a> {
     }
 }
 
+#[cfg(feature = "legacy")]
 impl Lint<Vec<Attribute>> for FieldDefs<'_> {
     fn lint(&self, input: &Vec<Attribute>, c: &mut Collector) {
         for def in self.defs.iter() {

@@ -1,3 +1,4 @@
+#[cfg(feature = "legacy")]
 use macro_compose::{Collector, Lint};
 use quote::ToTokens;
 use std::convert::TryFrom;
@@ -7,14 +8,15 @@ use syn::{parse_quote, Error, GenericArgument, Lit, Path, PathArguments};
 /// the type of a field
 pub struct Type {
     /// the actual type
-    pub r#type: Types,
+    pub ty: Types,
     /// whether or not the value for the type is optional
     pub optional: bool,
 }
 
+#[cfg(feature = "legacy")]
 impl<'a> Lint<Option<&'a Lit>> for Type {
     fn lint(&self, input: &Option<&'a Lit>, c: &mut Collector) {
-        let ty = match self.r#type {
+        let ty = match self.ty {
             Types::Any => "anything",
             Types::Flag => "nothing",
             Types::Str => "string",
@@ -26,7 +28,7 @@ impl<'a> Lint<Option<&'a Lit>> for Type {
             Types::Bool => "bool",
         };
 
-        match (input, self.r#type) {
+        match (input, self.ty) {
             (Some(_), Types::Any) => {}
             (None, Types::Flag) => {}
             (None, _) if self.optional => {}
@@ -48,7 +50,6 @@ impl<'a> Lint<Option<&'a Lit>> for Type {
         }
     }
 }
-
 #[derive(Clone, Copy, Debug)]
 /// all the types a field can contain
 pub enum Types {
@@ -84,37 +85,37 @@ impl TryFrom<&syn::Type> for Type {
             syn::Type::Path(p) => {
                 if p.path.is_ident("String") {
                     Ok(Type {
-                        r#type: Types::Str,
+                        ty: Types::Str,
                         optional: false,
                     })
                 } else if p.path == byte_vec_path {
                     Ok(Type {
-                        r#type: Types::ByteStr,
+                        ty: Types::ByteStr,
                         optional: false,
                     })
                 } else if p.path.is_ident("u8") {
                     Ok(Type {
-                        r#type: Types::Byte,
+                        ty: Types::Byte,
                         optional: false,
                     })
                 } else if p.path.is_ident("char") {
                     Ok(Type {
-                        r#type: Types::Char,
+                        ty: Types::Char,
                         optional: false,
                     })
                 } else if p.path.is_ident("i32") {
                     Ok(Type {
-                        r#type: Types::I32,
+                        ty: Types::I32,
                         optional: false,
                     })
                 } else if p.path.is_ident("f32") {
                     Ok(Type {
-                        r#type: Types::F32,
+                        ty: Types::F32,
                         optional: false,
                     })
                 } else if p.path.is_ident("bool") {
                     Ok(Type {
-                        r#type: Types::Bool,
+                        ty: Types::Bool,
                         optional: false,
                     })
                 } else {
@@ -128,7 +129,7 @@ impl TryFrom<&syn::Type> for Type {
                                             error()
                                         } else {
                                             Ok(Type {
-                                                r#type: ty.r#type,
+                                                ty: ty.ty,
                                                 optional: true,
                                             })
                                         }
@@ -141,7 +142,7 @@ impl TryFrom<&syn::Type> for Type {
                 }
             }
             syn::Type::Tuple(t) if t.elems.is_empty() => Ok(Type {
-                r#type: Types::Flag,
+                ty: Types::Flag,
                 optional: false,
             }),
             _ => error(),

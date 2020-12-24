@@ -49,7 +49,10 @@ impl Lint<DeriveInput> for NameLint {
     fn lint(&self, input: &DeriveInput, c: &mut Collector) {
         if let Data::Struct(s) = &input.data {
             for field in s.fields.iter() {
-                if let Some(name) = RENAME_FIELD.get_value::<Option<String>>(&field.attrs) {
+                if let Some(name) = RENAME_FIELD
+                    .get_value::<Option<String>>(&field.attrs)
+                    .unwrap()
+                {
                     if let Err(e) = parse_str::<Ident>(&name) {
                         let meta = RENAME_FIELD.get_lit(&field.attrs);
                         let e = Error::new_spanned(meta, e);

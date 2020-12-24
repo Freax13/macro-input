@@ -1,6 +1,6 @@
 use macro_compose::{Collector, Context};
 use macro_input_macros::MacroInput;
-use std::fmt::Debug;
+use std::{convert::TryFrom, fmt::Debug};
 use syn::{parse_quote, Attribute};
 
 #[derive(MacroInput, PartialEq, Debug)]
@@ -21,7 +21,7 @@ fn test_basic_input() {
         let mut ctx = Context::new_by_ref(&mut collector, &attrs);
         assert!(ctx.lint(Input::lint()));
 
-        let res = Input::from(attrs.as_slice());
+        let res = Input::try_from(attrs.as_slice()).unwrap();
         assert_eq!(value, res);
     }
 
@@ -62,7 +62,7 @@ fn test_other_input() {
         let mut ctx = Context::new_by_ref(&mut collector, &attrs);
         assert!(ctx.lint(OtherInput::lint()));
 
-        let res = OtherInput::from(attrs.as_slice());
+        let res = OtherInput::try_from(attrs.as_slice()).unwrap();
         assert_eq!(value, res);
     }
 

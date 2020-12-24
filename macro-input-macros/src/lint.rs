@@ -7,7 +7,10 @@ pub struct NameLint;
 
 impl Lint<DeriveInput> for NameLint {
     fn lint(&self, input: &DeriveInput, c: &mut Collector) {
-        if let Some(name) = RENAME_FIELD.get_value::<Option<String>>(&input.attrs) {
+        if let Some(name) = RENAME_FIELD
+            .get_value::<Option<String>>(&input.attrs)
+            .unwrap()
+        {
             if let Err(e) = parse_str::<Ident>(&name) {
                 let meta = RENAME_FIELD.get_lit(&input.attrs).unwrap();
                 let e = Error::new_spanned(meta, e);

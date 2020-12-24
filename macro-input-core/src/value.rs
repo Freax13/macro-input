@@ -34,8 +34,8 @@ impl DefaultValue {
     /// construct a `DefaultValue` from a type and a literal
     /// # Panics
     /// panics if the literal is not compatible with the type
-    pub fn from_lit(r#type: Type, lit: Option<&Lit>) -> DefaultValue {
-        match r#type.r#type {
+    pub fn from_lit(ty: Type, lit: Option<&Lit>) -> DefaultValue {
+        match ty.ty {
             Types::Any => DefaultValue::Any(lit.cloned()),
             Types::Flag => DefaultValue::Flag,
             Types::Str => DefaultValue::String(lit.map(|lit| {
@@ -91,9 +91,9 @@ impl DefaultValue {
     }
 
     /// get the type of the value
-    pub fn r#type(&self, optional: bool) -> Type {
+    pub fn ty(&self, optional: bool) -> Type {
         Type {
-            r#type: Types::from(self),
+            ty: Types::from(self),
             optional,
         }
     }
@@ -112,6 +112,28 @@ impl DefaultValue {
             DefaultValue::I32(val) => val.is_some(),
             DefaultValue::F32(val) => val.is_some(),
             DefaultValue::Bool(val) => val.is_some(),
+        }
+    }
+
+    pub(crate) fn as_lit(&self) -> Option<Lit> {
+        match self {
+            DefaultValue::Flag => None,
+            DefaultValue::Any(val) => val.clone(),
+            DefaultValue::Str(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::String(val) => val.as_ref().map(|v| parse_quote!(#v)),
+            DefaultValue::ByteStr(val) => val.map(|v| {
+                let lbs = LitByteStr::new(&v, Span::call_site());
+                parse_quote!(#lbs)
+            }),
+            DefaultValue::ByteString(val) => val.as_ref().map(|v| {
+                let lbs = LitByteStr::new(&v, Span::call_site());
+                parse_quote!(#lbs)
+            }),
+            DefaultValue::Byte(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::Char(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::I32(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::F32(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::Bool(val) => val.map(|v| parse_quote!(#v)),
         }
     }
 }

@@ -1,4 +1,5 @@
 use crate::{convert::FromMeta, DefaultValue};
+#[cfg(feature = "legacy")]
 use macro_compose::{Collector, Context, Lint};
 use proc_macro2::Span;
 use quote::{format_ident, ToTokens};
@@ -109,10 +110,8 @@ impl<'a> FieldDef<'a> {
         }
 
         // construct a default meta
-        if self.default.has_default_data() {
+        if let Some(lit) = self.default.as_lit() {
             let name = format_ident!("{}", self.path);
-            let lit: Option<Lit> = self.default.clone().into();
-            let lit = lit.unwrap();
 
             return Some(parse_quote!(#name = #lit));
         }
@@ -137,11 +136,12 @@ impl<'a> FieldDef<'a> {
     }
 
     /// try to extract the value from the literal that has the value for this field
-    pub fn get_value<V: FromMeta>(&self, attrs: &[Attribute]) -> V {
+    pub fn get_value<V: FromMeta>(&self, attrs: &[Attribute]) -> Result<V, Error> {
         FromMeta::from(self.get_meta(attrs))
     }
 }
 
+#[cfg(feature = "legacy")]
 impl Lint<Vec<Attribute>> for FieldDef<'_> {
     fn lint(&self, input: &Vec<Attribute>, c: &mut Collector) {
         let mut found = false;
@@ -166,9 +166,12 @@ impl Lint<Vec<Attribute>> for FieldDef<'_> {
 
                                         let some_lit = Some(&meta.lit);
                                         let mut subcontext = Context::new_by_ref(c, &some_lit);
-                                        subcontext.lint(&self.default.r#type(
-                                            !self.required && !self.default.has_default_data(),
-                                        ));
+                                        subcontext.lint(
+                                            &self
+                                                .default
+                                                .ty(!self.required
+                                                    && !self.default.has_default_data()),
+                                        );
                                     }
                                     Meta::Path(_) => {
                                         if found {
@@ -181,9 +184,12 @@ impl Lint<Vec<Attribute>> for FieldDef<'_> {
                                         }
 
                                         let mut subcontext = Context::new_by_ref(c, &None);
-                                        subcontext.lint(&self.default.r#type(
-                                            !self.required && !self.default.has_default_data(),
-                                        ));
+                                        subcontext.lint(
+                                            &self
+                                                .default
+                                                .ty(!self.required
+                                                    && !self.default.has_default_data()),
+                                        );
                                     }
                                     _ => {
                                         c.error(Error::new_spanned(&meta, "unexpected meta list"));

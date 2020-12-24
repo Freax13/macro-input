@@ -46,7 +46,7 @@ pub fn derive_macro_input(item: TokenStream) -> TokenStream {
     ctx.lint(&lint::NameLint);
 
     // expand
-    ctx.expand(&convert::FromAttributesExpand);
+    ctx.expand(&convert::TryFromAttributesExpand);
     ctx.expand(&fielddef::ConstFieldsExpand);
     ctx.expand(&fns::LintExpand);
     ctx.expand(&fns::StripExpand);

@@ -48,5 +48,5 @@ fn test_field<T: FromMeta + PartialEq + Debug>(attr: Attribute, field: &FieldDef
     let mut collector = Collector::new();
     let mut ctx = Context::new_by_ref(&mut collector, &attrs);
     assert_eq!(ctx.lint(field), true);
-    assert_eq!(field.get_value::<T>(&attrs), value);
+    assert_eq!(field.get_value::<T>(&attrs).unwrap(), value);
 }

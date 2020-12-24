@@ -12,7 +12,7 @@ proc-macro = true
 
 [dependencies]
 macro-compose = "0.1"
-macro-input-core = { path = "../macro-input-core", version = "0.1.0" }
+macro-input-core = { path = "../macro-input-core", version = "0.1.0", features = ["legacy"] }
 
 syn = { version = "1.0", features = ["full", "extra-traits"] }
 quote = "1.0"

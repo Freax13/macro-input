@@ -2,9 +2,9 @@ use crate::{field_name, mod_name};
 use macro_compose::{Collector, Expand};
 use syn::{parse_quote, Data, DeriveInput, Expr, FieldValue, Fields, ItemImpl};
 
-pub struct FromAttributesExpand;
+pub struct TryFromAttributesExpand;
 
-impl Expand<DeriveInput> for FromAttributesExpand {
+impl Expand<DeriveInput> for TryFromAttributesExpand {
     type Output = ItemImpl;
 
     fn expand(&self, input: &DeriveInput, _: &mut Collector) -> Option<Self::Output> {
@@ -18,7 +18,7 @@ impl Expand<DeriveInput> for FromAttributesExpand {
         let mod_name = mod_name(input);
         let values = fields.iter().map(|f| -> Expr {
             let (_, ident) = field_name(f);
-            parse_quote!(#mod_name :: #ident . get_value::<>(attrs))
+            parse_quote!(#mod_name::#ident.get_value::<>(attrs)?)
         });
 
         let block: Expr = match fields {
@@ -43,9 +43,11 @@ impl Expand<DeriveInput> for FromAttributesExpand {
         };
 
         Some(parse_quote!(
-            impl ::core::convert::From<&[::syn::Attribute]> for #ident {
-                fn from(attrs: &[::syn::Attribute]) -> Self {
-                    #block
+            impl ::core::convert::TryFrom<&[::syn::Attribute]> for #ident {
+                type Error = ::syn::Error;
+
+                fn try_from(attrs: &[::syn::Attribute]) -> ::syn::Result<Self> {
+                    ::std::result::Result::Ok(#block)
                 }
             }
         ))
