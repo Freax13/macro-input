@@ -42,7 +42,26 @@ impl<'a> Def<'a> {
         }
     }
 
-    /// strip the attributes for this field away
+    /// strip away the attributes for this field
+    ///
+    /// This is useful for attribute macros because rust has no way of knowing which attributes were used.
+    /// ```
+    /// # use macro_input_core as macro_input;
+    /// use macro_input::{DefaultValue, Def};
+    /// use syn::{parse_quote, Attribute};
+    ///
+    /// // construct some attributes
+    /// let foo_attr: Attribute = parse_quote!(#[foo(bar = false)]);
+    /// let other_attr: Attribute = parse_quote!(#[some(thing = "value")]);
+    /// let mut attrs = vec![foo_attr, other_attr.clone()];
+    ///
+    /// // strip away all mentions of the fields bar in foo
+    /// const BAR_FIELD: Def = Def::new("foo", "bar", false, DefaultValue::Bool(None));
+    /// BAR_FIELD.strip(&mut attrs);
+    ///
+    /// // the Vec no longer contains #[foo(bar = false)] but #[some(thing = "value")] is still there
+    /// assert_eq!(attrs, vec![other_attr]);
+    /// ```
     pub fn strip(&self, attrs: &mut Vec<Attribute>) {
         let data = replace(attrs, Vec::new());
         attrs.extend(data.into_iter().filter_map(|mut a| {
@@ -54,7 +73,7 @@ impl<'a> Def<'a> {
         }));
     }
 
-    /// strip the attribute and return if it is empty
+    /// strip the attribute and return whether it was empty
     fn strip_from_attribute(&self, attr: &mut Attribute) -> bool {
         let mut meta = if let Ok(meta) = attr.parse_meta() {
             meta
@@ -81,10 +100,9 @@ impl<'a> Def<'a> {
                     })
                     .cloned();
                 list.nested = Punctuated::from_iter(new_punctuated);
+
                 let empty = list.nested.is_empty();
-
-                attr.tokens = parse_quote!(#meta);
-
+                *attr = parse_quote!(#[#list]);
                 empty
             }
             Meta::Path(_) => true,
@@ -157,6 +175,20 @@ impl<'a> Def<'a> {
     }
 
     /// try to extract the value from the literal that has the value for this field
+    ///
+    /// ```
+    /// # use macro_input_core as macro_input;
+    /// use macro_input::{DefaultValue, Def};
+    /// use syn::{parse_quote, Attribute};
+    ///
+    /// # fn main() -> syn::Result<()> {
+    /// let attr = parse_quote!(#[foo(bar = false)]);
+    /// const BAR_FIELD: Def = Def::new("foo", "bar", false, DefaultValue::Bool(None));
+    /// let value = BAR_FIELD.get_value::<bool>(&[attr])?;
+    /// assert_eq!(value, false);
+    /// # Ok(())
+    /// # }
+    /// ```
     ///
     /// # Errors
     /// may return an error if the field doesn't exist or has a value of the wrong type
