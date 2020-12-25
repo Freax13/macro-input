@@ -1,7 +1,6 @@
 use crate::{convert::FromMeta, DefaultValue};
 #[cfg(feature = "legacy")]
 use macro_compose::{Collector, Context, Lint};
-#[cfg(feature = "legacy")]
 use proc_macro2::Span;
 use quote::{format_ident, ToTokens};
 use std::{iter::FromIterator, mem::replace};
