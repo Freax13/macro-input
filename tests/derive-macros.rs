@@ -1,5 +1,4 @@
-use macro_compose::{Collector, Context};
-use macro_input_macros::MacroInput;
+use macro_input::{DefaultValue, FieldDef, FromMeta, MacroInput};
 use std::{convert::TryFrom, fmt::Debug};
 use syn::{parse_quote, Attribute};
 
@@ -16,10 +15,6 @@ pub struct Input {
 fn test_basic_input() {
     fn test_input(attr: Attribute, value: Input) {
         let attrs = vec![attr];
-
-        let mut collector = Collector::new();
-        let mut ctx = Context::new_by_ref(&mut collector, &attrs);
-        assert!(ctx.lint(Input::lint()));
 
         let res = Input::try_from(attrs.as_slice()).unwrap();
         assert_eq!(value, res);
@@ -57,10 +52,6 @@ pub struct OtherInput {
 fn test_other_input() {
     fn test_input(attr: Attribute, value: OtherInput) {
         let attrs = vec![attr];
-
-        let mut collector = Collector::new();
-        let mut ctx = Context::new_by_ref(&mut collector, &attrs);
-        assert!(ctx.lint(OtherInput::lint()));
 
         let res = OtherInput::try_from(attrs.as_slice()).unwrap();
         assert_eq!(value, res);

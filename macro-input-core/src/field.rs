@@ -12,6 +12,7 @@ use syn::{
 /// a field definition
 /// # Example
 /// ```
+/// # use macro_input_core as macro_input;
 /// use macro_input::{DefaultValue, FieldDef};
 ///
 /// const BAR_FIELD: FieldDef = FieldDef::new("foo", "bar", false, DefaultValue::Bool(None));

@@ -5,6 +5,7 @@ use syn::{Data, DeriveInput, Error, ItemStruct};
 /// a lint for [`syn::ItemStruct`] or [`syn::DeriveInput`]
 /// # Example
 /// ```
+/// # use macro_input_core as macro_input;
 /// use macro_input::{DefaultValue, FieldDef, FieldDefs, StructLint};
 ///
 /// const BAR_FIELD: FieldDef = FieldDef::new("foo", "bar", false, DefaultValue::Bool(None));

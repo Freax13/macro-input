@@ -16,8 +16,7 @@ use syn::{DeriveInput, Field, LitStr};
 /// automatically derive `From<&[syn::Attribute]>`, `fn lint() -> &'static impl Lint<Vec<syn::Attribute>>` and `fn strip(attrs: &mut Vec<syn::Attribute>)`
 /// # Example
 /// ```
-/// use macro_input::MacroInput;
-///
+/// # use macro_input_macros::MacroInput;
 /// #[derive(MacroInput)]
 /// pub struct Input {
 ///     pub flag: Option<()>,
@@ -48,7 +47,6 @@ pub fn derive_macro_input(item: TokenStream) -> TokenStream {
     // expand
     ctx.expand(&convert::TryFromAttributesExpand);
     ctx.expand(&fielddef::ConstFieldsExpand);
-    ctx.expand(&fns::LintExpand);
     ctx.expand(&fns::StripExpand);
 
     collector.finish().into()

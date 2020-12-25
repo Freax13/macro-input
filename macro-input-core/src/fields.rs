@@ -7,6 +7,7 @@ use syn::{Attribute, Error, Meta, NestedMeta, Path};
 /// `FieldDefs` is a collection of [`FieldDef`]s
 /// # Example
 /// ```
+/// # use macro_input_core as macro_input;
 /// use macro_input::{DefaultValue, FieldDef, FieldDefs};
 ///
 /// const BAR_FIELD: FieldDef = FieldDef::new("foo", "bar", false, DefaultValue::Bool(None));

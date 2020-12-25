@@ -1,5 +1,4 @@
-use macro_compose::{Collector, Context};
-use macro_input_core::{DefaultValue, FieldDef, FromMeta};
+use macro_input::{DefaultValue, FieldDef, FromMeta};
 use std::fmt::Debug;
 use syn::{parse_quote, Attribute};
 
@@ -44,9 +43,5 @@ fn test_default_string() {
 
 fn test_field<T: FromMeta + PartialEq + Debug>(attr: Attribute, field: &FieldDef, value: T) {
     let attrs = vec![attr];
-
-    let mut collector = Collector::new();
-    let mut ctx = Context::new_by_ref(&mut collector, &attrs);
-    assert_eq!(ctx.lint(field), true);
     assert_eq!(field.get_value::<T>(&attrs).unwrap(), value);
 }
