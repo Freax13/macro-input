@@ -6,10 +6,10 @@ use syn::{Data, DeriveInput, Error, ItemStruct};
 /// # Example
 /// ```
 /// # use macro_input_core as macro_input;
-/// use macro_input::{Default, Def, Defs, StructLint};
+/// use macro_input::{DefaultValue, Def, Defs, StructLint};
 ///
-/// const BAR_FIELD: Def = Def::new("foo", "bar", false, Default::Bool(None));
-/// const BAZ_FIELD: Def = Def::new("foo", "baz", false, Default::Str(None));
+/// const BAR_FIELD: Def = Def::new("foo", "bar", false, DefaultValue::Bool(None));
+/// const BAZ_FIELD: Def = Def::new("foo", "baz", false, DefaultValue::Str(None));
 /// const FOO_FIELDS: &[&Def] = &[&BAR_FIELD, &BAZ_FIELD];
 /// const FOO_FIELD_DEFS: Defs = Defs::new(FOO_FIELDS);
 ///

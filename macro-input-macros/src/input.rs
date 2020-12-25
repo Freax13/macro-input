@@ -1,8 +1,12 @@
-use macro_input_core::{Def, Default, Defs, StructLint};
+use macro_input_core::{Def, DefaultValue, Defs, StructLint};
 
-pub const RENAME_FIELD: Def = Def::new("macro_input", "rename", false, Default::Str(None));
-pub const DEFAULT_VALUE_FIELD: Def =
-    Def::new("macro_input", "default_value", false, Default::Any(None));
+pub const RENAME_FIELD: Def = Def::new("macro_input", "rename", false, DefaultValue::Str(None));
+pub const DEFAULT_VALUE_FIELD: Def = Def::new(
+    "macro_input",
+    "default_value",
+    false,
+    DefaultValue::Any(None),
+);
 
 const FIELDS_FIELDS: &[&Def] = &[&RENAME_FIELD, &DEFAULT_VALUE_FIELD];
 const FIELDS_FIELD_DEFS: Defs = Defs::new(FIELDS_FIELDS);

@@ -15,4 +15,4 @@ pub use fields::Defs;
 #[cfg(feature = "legacy")]
 pub use r#struct::StructLint;
 pub use ty::{Type, Types};
-pub use value::Default;
+pub use value::DefaultValue;

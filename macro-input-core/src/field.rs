@@ -1,4 +1,4 @@
-use crate::{convert::FromMeta, Default};
+use crate::{convert::FromMeta, DefaultValue};
 #[cfg(feature = "legacy")]
 use macro_compose::{Collector, Context, Lint};
 #[cfg(feature = "legacy")]
@@ -14,10 +14,10 @@ use syn::{
 /// # Example
 /// ```
 /// # use macro_input_core as macro_input;
-/// use macro_input::{Default, Def};
+/// use macro_input::{DefaultValue, Def};
 ///
-/// const BAR_FIELD: Def = Def::new("foo", "bar", false, Default::Bool(None));
-/// const BAZ_FIELD: Def = Def::new("foo", "baz", false, Default::Str(None));
+/// const BAR_FIELD: Def = Def::new("foo", "bar", false, DefaultValue::Bool(None));
+/// const BAZ_FIELD: Def = Def::new("foo", "baz", false, DefaultValue::Str(None));
 /// ```
 pub struct Def<'a> {
     /// the path/namespace of the field
@@ -27,13 +27,13 @@ pub struct Def<'a> {
     /// whether or not this field is required
     pub required: bool,
     /// the typed default value
-    pub default: Default,
+    pub default: DefaultValue,
 }
 
 impl<'a> Def<'a> {
     /// create a new field definition
     #[must_use]
-    pub const fn new(path: &'a str, name: &'a str, required: bool, default: Default) -> Self {
+    pub const fn new(path: &'a str, name: &'a str, required: bool, default: DefaultValue) -> Self {
         Def {
             path,
             name,

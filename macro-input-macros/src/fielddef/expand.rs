@@ -1,7 +1,7 @@
 use crate::{field_name, mod_name, DEFAULT_VALUE_FIELD, RENAME_FIELD};
 use heck::SnekCase;
 use macro_compose::{Collector, Context, Expand};
-use macro_input_core::Default;
+use macro_input_core::DefaultValue;
 use std::convert::TryFrom;
 use syn::{parse_quote, Data, DeriveInput, Expr, Field, ItemConst, ItemMod, Type};
 
@@ -64,7 +64,7 @@ impl Expand<Field> for ConstFieldExpand {
         let (name, ident) = field_name(f);
 
         let default_value = DEFAULT_VALUE_FIELD.get_lit(&f.attrs).unwrap();
-        let value = Default::from_lit(
+        let value = DefaultValue::from_lit(
             macro_input_core::Type::try_from(&f.ty).unwrap(),
             default_value.clone(),
         )

@@ -5,7 +5,7 @@ use syn::{parse_quote, Error, Lit, LitByteStr, Result};
 
 #[derive(Clone)]
 /// a default value for a [`Def`](crate::Def)
-pub enum Default {
+pub enum DefaultValue {
     /// any literal
     Any(Option<Lit>),
     /// a flag that doesn't have a value eg #[my_input(enabled)]
@@ -30,14 +30,14 @@ pub enum Default {
     Bool(Option<bool>),
 }
 
-impl Default {
-    /// construct a `Default` from a type and a literal
+impl DefaultValue {
+    /// construct a `DefaultValue` from a type and a literal
     /// # Errors
     /// may return an error if the literal is not compatible with the type
-    pub fn from_lit(ty: Type, lit: Option<Lit>) -> Result<Default> {
+    pub fn from_lit(ty: Type, lit: Option<Lit>) -> Result<DefaultValue> {
         match ty.ty {
-            Types::Any => Ok(Default::Any(lit)),
-            Types::Flag => Ok(Default::Flag),
+            Types::Any => Ok(DefaultValue::Any(lit)),
+            Types::Flag => Ok(DefaultValue::Flag),
             Types::Str => lit
                 .map(|lit| {
                     if let Lit::Str(v) = lit {
@@ -47,7 +47,7 @@ impl Default {
                     }
                 })
                 .transpose()
-                .map(Default::String),
+                .map(DefaultValue::String),
             Types::ByteStr => lit
                 .map(|lit| {
                     if let Lit::ByteStr(v) = lit {
@@ -57,7 +57,7 @@ impl Default {
                     }
                 })
                 .transpose()
-                .map(Default::ByteString),
+                .map(DefaultValue::ByteString),
             Types::Byte => lit
                 .map(|lit| {
                     if let Lit::Byte(v) = lit {
@@ -67,7 +67,7 @@ impl Default {
                     }
                 })
                 .transpose()
-                .map(Default::Byte),
+                .map(DefaultValue::Byte),
             Types::Char => lit
                 .map(|lit| {
                     if let Lit::Char(v) = lit {
@@ -77,7 +77,7 @@ impl Default {
                     }
                 })
                 .transpose()
-                .map(Default::Char),
+                .map(DefaultValue::Char),
             Types::I32 => lit
                 .map(|lit| {
                     if let Lit::Int(v) = lit {
@@ -87,7 +87,7 @@ impl Default {
                     }
                 })
                 .transpose()
-                .map(Default::I32),
+                .map(DefaultValue::I32),
             Types::F32 => lit
                 .map(|lit| {
                     if let Lit::Int(v) = lit {
@@ -97,7 +97,7 @@ impl Default {
                     }
                 })
                 .transpose()
-                .map(Default::F32),
+                .map(DefaultValue::F32),
             Types::Bool => lit
                 .map(|lit| {
                     if let Lit::Bool(v) = lit {
@@ -107,7 +107,7 @@ impl Default {
                     }
                 })
                 .transpose()
-                .map(Default::Bool),
+                .map(DefaultValue::Bool),
         }
     }
 
@@ -124,84 +124,84 @@ impl Default {
     #[must_use]
     pub fn has_default_data(&self) -> bool {
         match self {
-            Default::Any(val) => val.is_some(),
-            Default::Flag => false,
-            Default::Str(val) => val.is_some(),
-            Default::String(val) => val.is_some(),
-            Default::ByteStr(val) => val.is_some(),
-            Default::ByteString(val) => val.is_some(),
-            Default::Byte(val) => val.is_some(),
-            Default::Char(val) => val.is_some(),
-            Default::I32(val) => val.is_some(),
-            Default::F32(val) => val.is_some(),
-            Default::Bool(val) => val.is_some(),
+            DefaultValue::Any(val) => val.is_some(),
+            DefaultValue::Flag => false,
+            DefaultValue::Str(val) => val.is_some(),
+            DefaultValue::String(val) => val.is_some(),
+            DefaultValue::ByteStr(val) => val.is_some(),
+            DefaultValue::ByteString(val) => val.is_some(),
+            DefaultValue::Byte(val) => val.is_some(),
+            DefaultValue::Char(val) => val.is_some(),
+            DefaultValue::I32(val) => val.is_some(),
+            DefaultValue::F32(val) => val.is_some(),
+            DefaultValue::Bool(val) => val.is_some(),
         }
     }
 
     pub(crate) fn as_lit(&self) -> Option<Lit> {
         match self {
-            Default::Flag => None,
-            Default::Any(val) => val.clone(),
-            Default::Str(val) => val.map(|v| parse_quote!(#v)),
-            Default::String(val) => val.as_ref().map(|v| parse_quote!(#v)),
-            Default::ByteStr(val) => val.map(|v| {
+            DefaultValue::Flag => None,
+            DefaultValue::Any(val) => val.clone(),
+            DefaultValue::Str(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::String(val) => val.as_ref().map(|v| parse_quote!(#v)),
+            DefaultValue::ByteStr(val) => val.map(|v| {
                 let lbs = LitByteStr::new(&v, Span::call_site());
                 parse_quote!(#lbs)
             }),
-            Default::ByteString(val) => val.as_ref().map(|v| {
+            DefaultValue::ByteString(val) => val.as_ref().map(|v| {
                 let lbs = LitByteStr::new(&v, Span::call_site());
                 parse_quote!(#lbs)
             }),
-            Default::Byte(val) => val.map(|v| parse_quote!(#v)),
-            Default::Char(val) => val.map(|v| parse_quote!(#v)),
-            Default::I32(val) => val.map(|v| parse_quote!(#v)),
-            Default::F32(val) => val.map(|v| parse_quote!(#v)),
-            Default::Bool(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::Byte(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::Char(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::I32(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::F32(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::Bool(val) => val.map(|v| parse_quote!(#v)),
         }
     }
 }
 
-impl From<Default> for Option<Lit> {
-    fn from(val: Default) -> Self {
+impl From<DefaultValue> for Option<Lit> {
+    fn from(val: DefaultValue) -> Self {
         match val {
-            Default::Flag => None,
-            Default::Any(val) => val,
-            Default::Str(val) => val.map(|v| parse_quote!(#v)),
-            Default::String(val) => val.map(|v| parse_quote!(#v)),
-            Default::ByteStr(val) => val.map(|v| {
+            DefaultValue::Flag => None,
+            DefaultValue::Any(val) => val,
+            DefaultValue::Str(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::String(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::ByteStr(val) => val.map(|v| {
                 let lbs = LitByteStr::new(&v, Span::call_site());
                 parse_quote!(#lbs)
             }),
-            Default::ByteString(val) => val.map(|v| {
+            DefaultValue::ByteString(val) => val.map(|v| {
                 let lbs = LitByteStr::new(&v, Span::call_site());
                 parse_quote!(#lbs)
             }),
-            Default::Byte(val) => val.map(|v| parse_quote!(#v)),
-            Default::Char(val) => val.map(|v| parse_quote!(#v)),
-            Default::I32(val) => val.map(|v| parse_quote!(#v)),
-            Default::F32(val) => val.map(|v| parse_quote!(#v)),
-            Default::Bool(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::Byte(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::Char(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::I32(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::F32(val) => val.map(|v| parse_quote!(#v)),
+            DefaultValue::Bool(val) => val.map(|v| parse_quote!(#v)),
         }
     }
 }
 
-impl From<&Default> for Types {
-    fn from(value: &Default) -> Self {
+impl From<&DefaultValue> for Types {
+    fn from(value: &DefaultValue) -> Self {
         match value {
-            Default::Any(_) => Types::Any,
-            Default::Flag => Types::Flag,
-            Default::Str(_) | Default::String(_) => Types::Str,
-            Default::ByteStr(_) | Default::ByteString(_) => Types::ByteStr,
-            Default::Byte(_) => Types::Byte,
-            Default::Char(_) => Types::Char,
-            Default::I32(_) => Types::I32,
-            Default::F32(_) => Types::F32,
-            Default::Bool(_) => Types::Bool,
+            DefaultValue::Any(_) => Types::Any,
+            DefaultValue::Flag => Types::Flag,
+            DefaultValue::Str(_) | DefaultValue::String(_) => Types::Str,
+            DefaultValue::ByteStr(_) | DefaultValue::ByteString(_) => Types::ByteStr,
+            DefaultValue::Byte(_) => Types::Byte,
+            DefaultValue::Char(_) => Types::Char,
+            DefaultValue::I32(_) => Types::I32,
+            DefaultValue::F32(_) => Types::F32,
+            DefaultValue::Bool(_) => Types::Bool,
         }
     }
 }
 
-impl ToTokens for Default {
+impl ToTokens for DefaultValue {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         fn map_literal<V: ToTokens>(v: &Option<V>) -> TokenStream {
             if let Some(data) = v {
@@ -212,46 +212,46 @@ impl ToTokens for Default {
         }
 
         let tts = match self {
-            Default::Any(v) => {
+            DefaultValue::Any(v) => {
                 let data = map_literal(v);
-                quote!(::macro_input::Default::Any(#data))
+                quote!(::macro_input::DefaultValue::Any(#data))
             }
-            Default::Flag => quote!(::macro_input::Default::Flag),
-            Default::Str(v) => {
+            DefaultValue::Flag => quote!(::macro_input::DefaultValue::Flag),
+            DefaultValue::Str(v) => {
                 let data = map_literal(v);
-                quote!(::macro_input::Default::Str(#data))
+                quote!(::macro_input::DefaultValue::Str(#data))
             }
-            Default::String(v) => {
+            DefaultValue::String(v) => {
                 let data = map_literal(v);
-                quote!(::macro_input::Default::Str(#data))
+                quote!(::macro_input::DefaultValue::Str(#data))
             }
-            Default::ByteStr(v) => {
+            DefaultValue::ByteStr(v) => {
                 let data = map_literal(&v.as_ref().map(|v| LitByteStr::new(v, Span::call_site())));
-                quote!(::macro_input::Default::ByteStr(#data))
+                quote!(::macro_input::DefaultValue::ByteStr(#data))
             }
-            Default::ByteString(v) => {
+            DefaultValue::ByteString(v) => {
                 let data = map_literal(&v.as_ref().map(|v| LitByteStr::new(v, Span::call_site())));
-                quote!(::macro_input::Default::ByteStr(#data))
+                quote!(::macro_input::DefaultValue::ByteStr(#data))
             }
-            Default::Byte(v) => {
+            DefaultValue::Byte(v) => {
                 let data = map_literal(v);
-                quote!(::macro_input::Default::Byte(#data))
+                quote!(::macro_input::DefaultValue::Byte(#data))
             }
-            Default::Char(v) => {
+            DefaultValue::Char(v) => {
                 let data = map_literal(v);
-                quote!(::macro_input::Default::Char(#data))
+                quote!(::macro_input::DefaultValue::Char(#data))
             }
-            Default::I32(v) => {
+            DefaultValue::I32(v) => {
                 let data = map_literal(v);
-                quote!(::macro_input::Default::I32(#data))
+                quote!(::macro_input::DefaultValue::I32(#data))
             }
-            Default::F32(v) => {
+            DefaultValue::F32(v) => {
                 let data = map_literal(v);
-                quote!(::macro_input::Default::F32(#data))
+                quote!(::macro_input::DefaultValue::F32(#data))
             }
-            Default::Bool(v) => {
+            DefaultValue::Bool(v) => {
                 let data = map_literal(v);
-                quote!(::macro_input::Default::Bool(#data))
+                quote!(::macro_input::DefaultValue::Bool(#data))
             }
         };
         tokens.extend(tts);
