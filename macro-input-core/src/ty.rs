@@ -1,8 +1,11 @@
 #[cfg(feature = "legacy")]
 use macro_compose::{Collector, Lint};
+#[cfg(feature = "legacy")]
 use quote::ToTokens;
 use std::convert::TryFrom;
-use syn::{parse_quote, Error, GenericArgument, Lit, Path, PathArguments};
+#[cfg(feature = "legacy")]
+use syn::Lit;
+use syn::{parse_quote, Error, GenericArgument, Path, PathArguments};
 
 #[derive(Clone, Copy, Debug)]
 /// the type of a field

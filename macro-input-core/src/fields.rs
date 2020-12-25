@@ -1,8 +1,11 @@
 use crate::FieldDef;
 #[cfg(feature = "legacy")]
 use macro_compose::{Collector, Lint};
+#[cfg(feature = "legacy")]
 use quote::ToTokens;
-use syn::{Attribute, Error, Meta, NestedMeta, Path};
+use syn::Attribute;
+#[cfg(feature = "legacy")]
+use syn::{Error, Meta, NestedMeta, Path};
 
 /// `FieldDefs` is a collection of [`FieldDef`]s
 /// # Example
@@ -38,6 +41,7 @@ impl<'a> FieldDefs<'a> {
         }
     }
 
+    #[cfg(feature = "legacy")]
     fn has_path(&self, path: &Path) -> bool {
         for def in self.defs.iter() {
             if path.is_ident(def.path) {

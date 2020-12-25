@@ -1,4 +1,4 @@
-use macro_input::{DefaultValue, FieldDef, FromMeta, MacroInput};
+use macro_input::MacroInput;
 use std::{convert::TryFrom, fmt::Debug};
 use syn::{parse_quote, Attribute};
 
