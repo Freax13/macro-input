@@ -58,7 +58,7 @@ impl<'a> Lint<Option<&'a Lit>> for Type {
 pub enum Types {
     /// can contain any literal
     Any,
-    /// doesn't have a value eg #[my_input(enabled)]
+    /// doesn't have a value eg `#[my_input(enabled)]`
     Flag,
     /// for string
     Str,

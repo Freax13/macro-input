@@ -13,7 +13,7 @@ impl Expand<DeriveInput> for Strip {
 
         Some(parse_quote!(
             impl #ident {
-                /// strip the fields from the attributes
+                /// strip away the fields from the attributes
                 pub fn strip(attrs: &mut ::std::vec::Vec<::syn::Attribute>) {
                     #mod_name :: FIELD_DEFS .strip(attrs);
                 }

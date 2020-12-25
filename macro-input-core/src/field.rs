@@ -55,11 +55,11 @@ impl<'a> Def<'a> {
     /// let other_attr: Attribute = parse_quote!(#[some(thing = "value")]);
     /// let mut attrs = vec![foo_attr, other_attr.clone()];
     ///
-    /// // strip away all mentions of the fields bar in foo
+    /// // strip away all mentions of the field bar in foo
     /// const BAR_FIELD: Def = Def::new("foo", "bar", false, DefaultValue::Bool(None));
     /// BAR_FIELD.strip(&mut attrs);
     ///
-    /// // the Vec no longer contains #[foo(bar = false)] but #[some(thing = "value")] is still there
+    /// // the Vec no longer contains #[foo(bar = false)] but #[some(thing = "value")] remains
     /// assert_eq!(attrs, vec![other_attr]);
     /// ```
     pub fn strip(&self, attrs: &mut Vec<Attribute>) {

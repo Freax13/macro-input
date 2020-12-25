@@ -8,7 +8,7 @@ use syn::{parse_quote, Error, Lit, LitByteStr, Result};
 pub enum DefaultValue {
     /// any literal
     Any(Option<Lit>),
-    /// a flag that doesn't have a value eg #[my_input(enabled)]
+    /// a flag that doesn't have a value eg `#[my_input(enabled)]`
     Flag,
     /// a string
     Str(Option<&'static str>),
