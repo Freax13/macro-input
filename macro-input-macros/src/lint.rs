@@ -3,9 +3,9 @@ use macro_compose::{Collector, Lint};
 use proc_macro2::Ident;
 use syn::{parse_str, DeriveInput, Error};
 
-pub struct NameLint;
+pub struct Name;
 
-impl Lint<DeriveInput> for NameLint {
+impl Lint<DeriveInput> for Name {
     fn lint(&self, input: &DeriveInput, c: &mut Collector) {
         if let Some(name) = RENAME_FIELD
             .get_value::<Option<String>>(&input.attrs)

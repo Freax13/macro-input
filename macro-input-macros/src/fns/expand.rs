@@ -2,9 +2,9 @@ use crate::mod_name;
 use macro_compose::{Collector, Expand};
 use syn::{parse_quote, DeriveInput, ItemImpl};
 
-pub struct StripExpand;
+pub struct Strip;
 
-impl Expand<DeriveInput> for StripExpand {
+impl Expand<DeriveInput> for Strip {
     type Output = ItemImpl;
 
     fn expand(&self, input: &DeriveInput, _: &mut Collector) -> Option<Self::Output> {

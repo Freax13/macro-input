@@ -1,4 +1,4 @@
-use crate::FieldDef;
+use crate::Def;
 #[cfg(feature = "legacy")]
 use macro_compose::{Collector, Lint};
 #[cfg(feature = "legacy")]
@@ -7,34 +7,36 @@ use syn::Attribute;
 #[cfg(feature = "legacy")]
 use syn::{Error, Meta, NestedMeta, Path};
 
-/// `FieldDefs` is a collection of [`FieldDef`]s
+/// `Defs` is a collection of [`Def`]s
 /// # Example
 /// ```
 /// # use macro_input_core as macro_input;
-/// use macro_input::{DefaultValue, FieldDef, FieldDefs};
+/// use macro_input::{Default, Def, Defs};
 ///
-/// const BAR_FIELD: FieldDef = FieldDef::new("foo", "bar", false, DefaultValue::Bool(None));
-/// const BAZ_FIELD: FieldDef = FieldDef::new("foo", "baz", false, DefaultValue::Str(None));
-/// const FOO_FIELDS: &[&FieldDef] = &[&BAR_FIELD, &BAZ_FIELD];
-/// const FOO_FIELD_DEFS: FieldDefs = FieldDefs::new(FOO_FIELDS);
+/// const BAR_FIELD: Def = Def::new("foo", "bar", false, Default::Bool(None));
+/// const BAZ_FIELD: Def = Def::new("foo", "baz", false, Default::Str(None));
+/// const FOO_FIELDS: &[&Def] = &[&BAR_FIELD, &BAZ_FIELD];
+/// const FOO_FIELD_DEFS: Defs = Defs::new(FOO_FIELDS);
 /// ```
-pub struct FieldDefs<'a> {
-    defs: &'a [&'a FieldDef<'a>],
+pub struct Defs<'a> {
+    defs: &'a [&'a Def<'a>],
 }
 
-impl<'a> FieldDefs<'a> {
-    /// create a new collection of [`FieldDef`]s from a slice
-    pub const fn new(defs: &'a [&'a FieldDef<'a>]) -> Self {
-        FieldDefs { defs }
+impl<'a> Defs<'a> {
+    /// create a new collection of [`Def`]s from a slice
+    #[must_use]
+    pub const fn new(defs: &'a [&'a Def<'a>]) -> Self {
+        Defs { defs }
     }
 
-    /// return an empty collection of [`FieldDef`]s
-    pub const fn empty() -> &'static FieldDefs<'static> {
-        const EMPTY: FieldDefs<'static> = FieldDefs { defs: &[] };
+    /// return an empty collection of [`Def`]s
+    #[must_use]
+    pub const fn empty() -> &'static Defs<'static> {
+        const EMPTY: Defs<'static> = Defs { defs: &[] };
         &EMPTY
     }
 
-    /// strip the attributes for all field away
+    /// strip away the attributes for all fields
     pub fn strip(&self, attrs: &mut Vec<Attribute>) {
         for def in self.defs {
             def.strip(attrs);
@@ -53,14 +55,14 @@ impl<'a> FieldDefs<'a> {
     }
 }
 
-impl<'a> From<&'a [&'a FieldDef<'a>]> for FieldDefs<'a> {
-    fn from(defs: &'a [&'a FieldDef<'a>]) -> Self {
-        FieldDefs::new(defs)
+impl<'a> From<&'a [&'a Def<'a>]> for Defs<'a> {
+    fn from(defs: &'a [&'a Def<'a>]) -> Self {
+        Defs::new(defs)
     }
 }
 
 #[cfg(feature = "legacy")]
-impl Lint<Vec<Attribute>> for FieldDefs<'_> {
+impl Lint<Vec<Attribute>> for Defs<'_> {
     fn lint(&self, input: &Vec<Attribute>, c: &mut Collector) {
         for def in self.defs.iter() {
             def.lint(input, c);
@@ -85,7 +87,7 @@ impl Lint<Vec<Attribute>> for FieldDefs<'_> {
                                         }
                                     }
 
-                                    let is_part_of_defs = |def: &&FieldDef| {
+                                    let is_part_of_defs = |def: &&Def| {
                                         path.is_ident(&def.path) && meta.path().is_ident(&def.name)
                                     };
                                     if !self.defs.iter().any(is_part_of_defs) {

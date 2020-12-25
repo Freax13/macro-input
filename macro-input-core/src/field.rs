@@ -1,4 +1,4 @@
-use crate::{convert::FromMeta, DefaultValue};
+use crate::{convert::FromMeta, Default};
 #[cfg(feature = "legacy")]
 use macro_compose::{Collector, Context, Lint};
 #[cfg(feature = "legacy")]
@@ -7,19 +7,19 @@ use quote::{format_ident, ToTokens};
 use std::{iter::FromIterator, mem::replace};
 use syn::{
     parse::Parse, parse2, parse_quote, punctuated::Punctuated, Attribute, Error, Lit, Meta,
-    NestedMeta,
+    NestedMeta, Result,
 };
 
 /// a field definition
 /// # Example
 /// ```
 /// # use macro_input_core as macro_input;
-/// use macro_input::{DefaultValue, FieldDef};
+/// use macro_input::{Default, Def};
 ///
-/// const BAR_FIELD: FieldDef = FieldDef::new("foo", "bar", false, DefaultValue::Bool(None));
-/// const BAZ_FIELD: FieldDef = FieldDef::new("foo", "baz", false, DefaultValue::Str(None));
+/// const BAR_FIELD: Def = Def::new("foo", "bar", false, Default::Bool(None));
+/// const BAZ_FIELD: Def = Def::new("foo", "baz", false, Default::Str(None));
 /// ```
-pub struct FieldDef<'a> {
+pub struct Def<'a> {
     /// the path/namespace of the field
     pub path: &'a str,
     /// the name of the field
@@ -27,13 +27,14 @@ pub struct FieldDef<'a> {
     /// whether or not this field is required
     pub required: bool,
     /// the typed default value
-    pub default: DefaultValue,
+    pub default: Default,
 }
 
-impl<'a> FieldDef<'a> {
+impl<'a> Def<'a> {
     /// create a new field definition
-    pub const fn new(path: &'a str, name: &'a str, required: bool, default: DefaultValue) -> Self {
-        FieldDef {
+    #[must_use]
+    pub const fn new(path: &'a str, name: &'a str, required: bool, default: Default) -> Self {
+        Def {
             path,
             name,
             required,
@@ -45,10 +46,10 @@ impl<'a> FieldDef<'a> {
     pub fn strip(&self, attrs: &mut Vec<Attribute>) {
         let data = replace(attrs, Vec::new());
         attrs.extend(data.into_iter().filter_map(|mut a| {
-            if !self.strip_from_attribute(&mut a) {
-                Some(a)
-            } else {
+            if self.strip_from_attribute(&mut a) {
                 None
+            } else {
+                Some(a)
             }
         }));
     }
@@ -88,7 +89,10 @@ impl<'a> FieldDef<'a> {
     }
 
     /// try to find the meta that has the value for this field
-    pub fn get_meta(&self, attrs: &[Attribute]) -> Option<Meta> {
+    ///
+    /// # Errors
+    /// may return the error if the field is required but not found
+    pub fn get_meta(&self, attrs: &[Attribute]) -> Result<Option<Meta>> {
         for attr in attrs.iter() {
             let meta = attr.parse_meta().unwrap();
             if meta.path().is_ident(self.path) {
@@ -96,7 +100,7 @@ impl<'a> FieldDef<'a> {
                     for meta in list.nested.iter() {
                         if let NestedMeta::Meta(meta) = meta {
                             if meta.path().is_ident(self.name) {
-                                return Some(meta.clone());
+                                return Ok(Some(meta.clone()));
                             }
                         }
                     }
@@ -105,46 +109,60 @@ impl<'a> FieldDef<'a> {
         }
 
         if self.required {
-            panic!(
-                "attribute for required field not found: {}::{}",
-                self.path, self.name
-            );
+            return Err(Error::new(
+                Span::call_site(),
+                format!(
+                    "attribute for required field not found: {}::{}",
+                    self.path, self.name
+                ),
+            ));
         }
 
         // construct a default meta
         if let Some(lit) = self.default.as_lit() {
             let name = format_ident!("{}", self.path);
 
-            return Some(parse_quote!(#name = #lit));
+            return Ok(Some(parse_quote!(#name = #lit)));
         }
 
-        None
+        Ok(None)
     }
 
     /// try to find the literal that has the value for this field
-    pub fn get_lit(&self, attrs: &[Attribute]) -> Option<Lit> {
-        self.get_meta(attrs).and_then(|m| match m {
+    ///
+    /// # Errors
+    /// may return the error if the field is required but not found
+    pub fn get_lit(&self, attrs: &[Attribute]) -> Result<Option<Lit>> {
+        Ok(self.get_meta(attrs)?.and_then(|m| match m {
             Meta::NameValue(nvm) => Some(nvm.lit),
             _ => None,
-        })
+        }))
     }
 
     /// try to parse the literal that has the value for this field
-    pub fn get<L: Parse>(&self, attrs: &[Attribute]) -> Option<L> {
-        self.get_lit(attrs).map(|lit| {
-            let tokens = lit.to_token_stream();
-            parse2(tokens).unwrap()
-        })
+    ///
+    /// # Errors
+    /// may return the error if parsing fails
+    pub fn get<L: Parse>(&self, attrs: &[Attribute]) -> Result<Option<L>> {
+        self.get_lit(attrs)?
+            .map(|lit| {
+                let tokens = lit.to_token_stream();
+                parse2(tokens)
+            })
+            .transpose()
     }
 
     /// try to extract the value from the literal that has the value for this field
-    pub fn get_value<V: FromMeta>(&self, attrs: &[Attribute]) -> Result<V, Error> {
-        FromMeta::from(self.get_meta(attrs))
+    ///
+    /// # Errors
+    /// may return an error if the field doesn't exist or has a value of the wrong type
+    pub fn get_value<V: FromMeta>(&self, attrs: &[Attribute]) -> Result<V> {
+        self.get_meta(attrs).and_then(FromMeta::from)
     }
 }
 
 #[cfg(feature = "legacy")]
-impl Lint<Vec<Attribute>> for FieldDef<'_> {
+impl Lint<Vec<Attribute>> for Def<'_> {
     fn lint(&self, input: &Vec<Attribute>, c: &mut Collector) {
         let mut found = false;
 

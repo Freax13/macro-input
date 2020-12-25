@@ -1,4 +1,4 @@
-use crate::FieldDefs;
+use crate::Defs;
 use macro_compose::{Collector, Context, Lint};
 use syn::{Data, DeriveInput, Error, ItemStruct};
 
@@ -6,25 +6,26 @@ use syn::{Data, DeriveInput, Error, ItemStruct};
 /// # Example
 /// ```
 /// # use macro_input_core as macro_input;
-/// use macro_input::{DefaultValue, FieldDef, FieldDefs, StructLint};
+/// use macro_input::{Default, Def, Defs, StructLint};
 ///
-/// const BAR_FIELD: FieldDef = FieldDef::new("foo", "bar", false, DefaultValue::Bool(None));
-/// const BAZ_FIELD: FieldDef = FieldDef::new("foo", "baz", false, DefaultValue::Str(None));
-/// const FOO_FIELDS: &[&FieldDef] = &[&BAR_FIELD, &BAZ_FIELD];
-/// const FOO_FIELD_DEFS: FieldDefs = FieldDefs::new(FOO_FIELDS);
+/// const BAR_FIELD: Def = Def::new("foo", "bar", false, Default::Bool(None));
+/// const BAZ_FIELD: Def = Def::new("foo", "baz", false, Default::Str(None));
+/// const FOO_FIELDS: &[&Def] = &[&BAR_FIELD, &BAZ_FIELD];
+/// const FOO_FIELD_DEFS: Defs = Defs::new(FOO_FIELDS);
 ///
-/// const FOO_LINT: StructLint = StructLint::new(FieldDefs::empty(), &FOO_FIELD_DEFS);
+/// const FOO_LINT: StructLint = StructLint::new(Defs::empty(), &FOO_FIELD_DEFS);
 /// ```
 pub struct StructLint<'a> {
-    struct_defs: &'a FieldDefs<'a>,
-    fields_defs: &'a FieldDefs<'a>,
+    struct_defs: &'a Defs<'a>,
+    fields_defs: &'a Defs<'a>,
 }
 
 impl<'a> StructLint<'a> {
     /// create a new struct lint
     ///
     /// `struct_defs` lints attribute on the structs itself and `fields_defs` lints the fields of the struct
-    pub const fn new(struct_defs: &'a FieldDefs<'a>, fields_defs: &'a FieldDefs<'a>) -> Self {
+    #[must_use]
+    pub const fn new(struct_defs: &'a Defs<'a>, fields_defs: &'a Defs<'a>) -> Self {
         StructLint {
             struct_defs,
             fields_defs,

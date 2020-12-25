@@ -4,16 +4,17 @@ use proc_macro2::Ident;
 use std::convert::TryFrom;
 use syn::{parse_str, Data, DeriveInput, Error, Meta};
 
-pub struct FieldTypeLint;
+pub struct FieldType;
 
-impl Lint<DeriveInput> for FieldTypeLint {
+impl Lint<DeriveInput> for FieldType {
     fn lint(&self, input: &DeriveInput, c: &mut Collector) {
         if let Data::Struct(s) = &input.data {
             for field in s.fields.iter() {
                 let ty = macro_input_core::Type::try_from(&field.ty);
                 match ty {
                     Ok(mut ty) => {
-                        let default_value_attribute = DEFAULT_VALUE_FIELD.get_meta(&field.attrs);
+                        let default_value_attribute =
+                            DEFAULT_VALUE_FIELD.get_meta(&field.attrs).unwrap();
 
                         if ty.optional {
                             if let Some(attr) = &default_value_attribute {
@@ -43,9 +44,9 @@ impl Lint<DeriveInput> for FieldTypeLint {
     }
 }
 
-pub struct NameLint;
+pub struct Name;
 
-impl Lint<DeriveInput> for NameLint {
+impl Lint<DeriveInput> for Name {
     fn lint(&self, input: &DeriveInput, c: &mut Collector) {
         if let Data::Struct(s) = &input.data {
             for field in s.fields.iter() {
@@ -54,7 +55,7 @@ impl Lint<DeriveInput> for NameLint {
                     .unwrap()
                 {
                     if let Err(e) = parse_str::<Ident>(&name) {
-                        let meta = RENAME_FIELD.get_lit(&field.attrs);
+                        let meta = RENAME_FIELD.get_lit(&field.attrs).unwrap();
                         let e = Error::new_spanned(meta, e);
                         c.error(e);
                     }

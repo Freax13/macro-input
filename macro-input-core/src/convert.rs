@@ -3,16 +3,19 @@ use syn::{Error, Lit, Meta, Result};
 /// a trait for extracting a value from `Option<syn::Meta>`
 pub trait FromMeta: Sized {
     /// extract the value
+    ///
+    /// # Errors
+    /// may return an Error if the meta doesn't contain the correct value
     fn from(meta: Option<Meta>) -> Result<Self>;
 }
 
 impl FromMeta for Option<()> {
     fn from(meta: Option<Meta>) -> Result<Self> {
         meta.map_or(Ok(None), |m| {
-            if !matches!(m, Meta::Path(_)) {
-                Err(Error::new_spanned(m, "unexpected value"))
-            } else {
+            if matches!(m, Meta::Path(_)) {
                 Ok(Some(()))
+            } else {
+                Err(Error::new_spanned(m, "unexpected value"))
             }
         })
     }
@@ -23,6 +26,9 @@ impl FromMeta for Option<()> {
 /// [`FromMeta`] is automatically implemented for all implementations
 pub trait FromLit: Sized {
     /// extract the value
+    ///
+    /// # Errors
+    /// may return an Error if the literal doesn't contain the correct value
     fn from(lit: Option<Lit>) -> Result<Self>;
 }
 
@@ -88,7 +94,6 @@ impl FromLit for i32 {
     fn from(lit: Option<Lit>) -> Result<Self> {
         if let Some(Lit::Int(v)) = &lit {
             v.base10_parse()
-                .map_err(move |_| Error::new_spanned(lit, "expected i32"))
         } else {
             Err(Error::new_spanned(lit, "expected i32"))
         }
@@ -99,7 +104,6 @@ impl FromLit for f32 {
     fn from(lit: Option<Lit>) -> Result<Self> {
         if let Some(Lit::Float(v)) = &lit {
             v.base10_parse()
-                .map_err(|_| Error::new_spanned(lit, "expected f32"))
         } else {
             Err(Error::new_spanned(lit, "expected f32"))
         }

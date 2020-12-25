@@ -2,9 +2,9 @@ use crate::{field_name, mod_name};
 use macro_compose::{Collector, Expand};
 use syn::{parse_quote, Data, DeriveInput, Expr, FieldValue, Fields, ItemImpl};
 
-pub struct TryFromAttributesExpand;
+pub struct TryFromAttributes;
 
-impl Expand<DeriveInput> for TryFromAttributesExpand {
+impl Expand<DeriveInput> for TryFromAttributes {
     type Output = ItemImpl;
 
     fn expand(&self, input: &DeriveInput, _: &mut Collector) -> Option<Self::Output> {

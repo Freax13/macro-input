@@ -1,14 +1,13 @@
 use crate::{field_name, mod_name, DEFAULT_VALUE_FIELD, RENAME_FIELD};
-use heck::{ShoutySnekCase, SnekCase};
+use heck::SnekCase;
 use macro_compose::{Collector, Context, Expand};
-use macro_input_core::DefaultValue;
-use proc_macro2::Ident;
+use macro_input_core::Default;
 use std::convert::TryFrom;
-use syn::{parse_quote, Data, DeriveInput, Expr, Field, ItemConst, ItemMod, LitStr, Type};
+use syn::{parse_quote, Data, DeriveInput, Expr, Field, ItemConst, ItemMod, Type};
 
-pub struct ConstFieldsExpand;
+pub struct ConstFields;
 
-impl Expand<DeriveInput> for ConstFieldsExpand {
+impl Expand<DeriveInput> for ConstFields {
     type Output = ItemMod;
 
     fn expand(&self, input: &DeriveInput, c: &mut Collector) -> Option<Self::Output> {
@@ -39,8 +38,8 @@ impl Expand<DeriveInput> for ConstFieldsExpand {
             mod #mod_ident {
                 #(#const_fields)*
 
-                const FIELDS: &[&::macro_input::FieldDef] = &[#(&#field_refs),*];
-                pub const FIELD_DEFS: ::macro_input::FieldDefs = ::macro_input::FieldDefs::new(FIELDS);
+                const FIELDS: &[&::macro_input::Def] = &[#(&#field_refs),*];
+                pub const FIELD_DEFS: ::macro_input::Defs = ::macro_input::Defs::new(FIELDS);
             }
         ))
     }
@@ -54,18 +53,6 @@ impl Expand<Field> for ConstFieldExpand {
     type Output = ItemConst;
 
     fn expand(&self, f: &Field, _: &mut Collector) -> Option<Self::Output> {
-        fn field_name(f: &Field) -> (String, Ident) {
-            let (name, span) = match RENAME_FIELD.get::<LitStr>(&f.attrs) {
-                Some(s) => (s.value(), s.span()),
-                None => {
-                    let ident = f.ident.as_ref().unwrap();
-                    (ident.to_string(), ident.span())
-                }
-            };
-            let field_name = format!("{}_field", name).TO_SHOUTY_SNEK_CASE();
-            (name, Ident::new(&*field_name, span))
-        }
-
         fn is_optional(f: &Field) -> bool {
             if let Type::Path(tp) = &f.ty {
                 tp.path.segments.len() == 1 && tp.path.segments.first().unwrap().ident == "Option"
@@ -76,19 +63,20 @@ impl Expand<Field> for ConstFieldExpand {
 
         let (name, ident) = field_name(f);
 
-        let default_value = DEFAULT_VALUE_FIELD.get_lit(&f.attrs);
-        let value = DefaultValue::from_lit(
+        let default_value = DEFAULT_VALUE_FIELD.get_lit(&f.attrs).unwrap();
+        let value = Default::from_lit(
             macro_input_core::Type::try_from(&f.ty).unwrap(),
-            default_value.as_ref(),
-        );
+            default_value.clone(),
+        )
+        .unwrap();
 
         let optional = is_optional(f) || default_value.is_some();
         let required = !optional;
 
         let path = &self.path;
         Some(parse_quote!(
-            pub const #ident: ::macro_input::FieldDef =
-            ::macro_input::FieldDef::new(#path, #name, #required, #value);
+            pub const #ident: ::macro_input::Def =
+            ::macro_input::Def::new(#path, #name, #required, #value);
         ))
     }
 }

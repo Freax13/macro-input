@@ -32,16 +32,16 @@ impl<'a> Lint<Option<&'a Lit>> for Type {
         };
 
         match (input, self.ty) {
-            (Some(_), Types::Any) => {}
-            (None, Types::Flag) => {}
+            (Some(_), Types::Any)
+            | (None, Types::Flag)
+            | (Some(Lit::Str(_)), Types::Str)
+            | (Some(Lit::ByteStr(_)), Types::ByteStr)
+            | (Some(Lit::Byte(_)), Types::Byte)
+            | (Some(Lit::Char(_)), Types::Char)
+            | (Some(Lit::Int(_)), Types::I32)
+            | (Some(Lit::Float(_)), Types::F32)
+            | (Some(Lit::Bool(_)), Types::Bool) => {}
             (None, _) if self.optional => {}
-            (Some(Lit::Str(_)), Types::Str) => {}
-            (Some(Lit::ByteStr(_)), Types::ByteStr) => {}
-            (Some(Lit::Byte(_)), Types::Byte) => {}
-            (Some(Lit::Char(_)), Types::Char) => {}
-            (Some(Lit::Int(_)), Types::I32) => {}
-            (Some(Lit::Float(_)), Types::F32) => {}
-            (Some(Lit::Bool(_)), Types::Bool) => {}
             (Some(lit), _) => c.error(Error::new_spanned(
                 input,
                 format!("expected {}, got {}", ty, lit.to_token_stream()),
