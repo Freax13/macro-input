@@ -56,7 +56,11 @@ impl<'a> Def<'a> {
 
     /// strip the attribute and return if it is empty
     fn strip_from_attribute(&self, attr: &mut Attribute) -> bool {
-        let mut meta = attr.parse_meta().unwrap();
+        let mut meta = if let Ok(meta) = attr.parse_meta() {
+            meta
+        } else {
+            return false;
+        };
 
         // check the path
         if !meta.path().is_ident(self.path) {
@@ -94,7 +98,7 @@ impl<'a> Def<'a> {
     /// may return the error if the field is required but not found
     pub fn get_meta(&self, attrs: &[Attribute]) -> Result<Option<Meta>> {
         for attr in attrs.iter() {
-            let meta = attr.parse_meta().unwrap();
+            let meta = attr.parse_meta()?;
             if meta.path().is_ident(self.path) {
                 if let Meta::List(list) = meta {
                     for meta in list.nested.iter() {
